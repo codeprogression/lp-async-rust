@@ -44,7 +44,7 @@ pub trait AsyncStockSignal {
     async fn calculate(&self, series: &[f64]) -> Option<Self::SignalType>;
 }
 
-pub struct PriceDifference {}
+pub struct PriceDifference;
 
 #[async_trait]
 impl AsyncStockSignal for PriceDifference {
@@ -63,7 +63,7 @@ impl AsyncStockSignal for PriceDifference {
         }
     }
 }
-pub struct MinPrice {}
+pub struct MinPrice;
 
 #[async_trait]
 impl AsyncStockSignal for MinPrice {
@@ -78,7 +78,7 @@ impl AsyncStockSignal for MinPrice {
     }
 }
 
-pub struct MaxPrice {}
+pub struct MaxPrice;
 
 #[async_trait]
 impl AsyncStockSignal for MaxPrice {
