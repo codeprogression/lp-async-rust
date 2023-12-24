@@ -1,29 +1,9 @@
-use std::io::{Error, ErrorKind};
 use async_trait::async_trait;
+use time::format_description::well_known::Rfc2822;
 use time::OffsetDateTime;
 
-///
-/// Retrieve data from a data source and extract the closing prices. Errors during download are mapped onto io::Errors as InvalidData.
-///
-pub async fn fetch_closing_data(
-    symbol: &str,
-    beginning: OffsetDateTime,
-    end: OffsetDateTime,
-) -> std::io::Result<Vec<f64>> {
-    let provider = yahoo_finance_api::YahooConnector::new();
-    let response = provider
-        .get_quote_history(symbol, beginning, end).await
-        .map_err(|_| Error::from(ErrorKind::InvalidData))?;
-    let mut quotes = response
-        .quotes()
-        .map_err(|_| Error::from(ErrorKind::InvalidData))?;
-    if !quotes.is_empty() {
-        quotes.sort_by_cached_key(|k| k.timestamp);
-        Ok(quotes.iter().map(|q| q.adjclose as f64).collect())
-    } else {
-        Ok(vec![])
-    }
-}
+pub mod actors;
+
 ///
 /// A trait to provide a common interface for all signal calculations.
 ///
@@ -63,6 +43,7 @@ impl AsyncStockSignal for PriceDifference {
         }
     }
 }
+
 pub struct MinPrice;
 
 #[async_trait]
@@ -94,7 +75,7 @@ impl AsyncStockSignal for MaxPrice {
 }
 
 pub struct WindowedSMA {
-    pub window_size: usize
+    pub window_size: usize,
 }
 
 #[async_trait]
@@ -184,5 +165,15 @@ mod tests {
 
         let signal = WindowedSMA { window_size: 10 };
         assert_eq!(signal.calculate(&series).await, Some(vec![]));
+    }
+}
+
+pub trait ToRfc2822 {
+    fn to_rfc2822(&self) -> String;
+}
+
+impl ToRfc2822 for OffsetDateTime {
+    fn to_rfc2822(&self) -> String {
+        self.format(&Rfc2822).unwrap()
     }
 }
