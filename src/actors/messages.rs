@@ -1,3 +1,4 @@
+use serde::Serialize;
 use xactor::message;
 use time::OffsetDateTime;
 
@@ -27,9 +28,10 @@ impl Data {
 }
 
 #[message]
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
 pub struct Report {
-    pub(crate) timestamp: OffsetDateTime,
+    pub(crate) timestamp: i64,
+    pub(crate) period_start: OffsetDateTime,
     pub(crate) symbol: String,
     pub(crate) last_price: f64,
     pub(crate) period_min: f64,
@@ -37,3 +39,6 @@ pub struct Report {
     pub(crate) pct_change: f64,
     pub(crate) sma: f64,
 }
+
+#[message(result = "Vec<Report>")]
+pub struct TailRequest(pub usize);

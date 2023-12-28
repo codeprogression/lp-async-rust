@@ -16,7 +16,7 @@ pub struct StockDataReporter {
 #[async_trait::async_trait]
 impl Actor for StockDataReporter {
     async fn started(&mut self, ctx: &mut Context<Self>) -> xactor::Result<()> {
-        println!("period start,symbol,price,change %,min,max,30d avg");
+        println!("timestamp, period start,symbol,price,change %,min,max,30d avg");
 
         let file = File::create(format!("target/{}.csv", OffsetDateTime::now_utc().to_rfc2822())).await?;
         let _ = self.file.set(file);
@@ -32,8 +32,9 @@ impl Actor for StockDataReporter {
 impl Handler<Report> for StockDataReporter {
     async fn handle(&mut self, _ctx: &mut Context<Self>, msg: Report) {
         let entry = format!(
-            "{},{},${:.2},{:.2}%,${:.2},${:.2},${:.2}",
+            "{},{},{},${:.2},{:.2}%,${:.2},${:.2},${:.2}",
             msg.timestamp,
+            msg.period_start,
             msg.symbol,
             msg.last_price,
             msg.pct_change * 100.0,

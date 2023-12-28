@@ -91,7 +91,8 @@ impl Handler<Data> for StockFetcher {
             let sma = WindowedSMA { window_size: 30 }.calculate(&closes).await.unwrap();
 
             let report = Report {
-                timestamp: self.from,
+                timestamp: OffsetDateTime::now_utc().unix_timestamp(),
+                period_start: self.from,
                 symbol: msg.symbol.clone(),
                 last_price: *closes.last().unwrap_or(&0.0),
                 period_min: MinPrice.calculate(&closes).await.unwrap(),
